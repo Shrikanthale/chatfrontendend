@@ -1,44 +1,109 @@
-import { Box, Paper, TextField, Button, Typography, Avatar, RadioGroup, FormControlLabel, Radio, FormControl, FormLabel } from '@mui/material'
-import LockOutlinedIcon from '@mui/icons-material/LockOutlined'
-import axios from 'axios'
-import React, { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+// src/Registration/SignUp.js
+import {
+  Box,
+  Paper,
+  TextField,
+  Button,
+  Typography,
+  Avatar,
+  RadioGroup,
+  FormControlLabel,
+  Radio,
+  FormControl,
+  FormLabel
+} from "@mui/material";
+import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
+import axios from "axios";
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuthContext } from "../context/AuthContext";
 
 const SignUp = () => {
-  const navigate = useNavigate()
-  const [registeration , setRegistration] = useState({name:"" , email:"" , password:"", gender: ""})
+  const { setAuthUser } = useAuthContext();
+  const navigate = useNavigate();
+
+  const [registeration, setRegistration] = useState({
+    name: "",
+    email: "",
+    password: "",
+    gender: ""
+  });
 
   const handleChange = (e) => {
-    setRegistration({...registeration , [e.target.name] : e.target.value})
-  }
+    setRegistration({ ...registeration, [e.target.name]: e.target.value });
+  };
+
   const handleGenderChange = (e) => {
-    setRegistration({...registeration, gender: e.target.value})
-  }
-  const handleSignup = async(e) =>{
-    e.preventDefault()
+    setRegistration({ ...registeration, gender: e.target.value });
+  };
+
+  const handleSignup = async (e) => {
+    e.preventDefault();
     try {
-        let profilePic = '';
-        if (registeration.gender === 'male') profilePic = 'https://avatar.iran.liara.run/public/boy';
-        else if (registeration.gender === 'female') profilePic = 'https://avatar.iran.liara.run/public/girl';
-        else profilePic = 'https://avatar.iran.liara.run/public/other';
-        const payload = { ...registeration, profilePic };
-        await axios.post("http://localhost:8000/api/user/signup", payload)
-        setRegistration({name:"", email:"", password:"", gender: ""})
-        navigate("/createpost")
+      let profilePic = "";
+      if (registeration.gender === "male")
+        profilePic = "https://avatar.iran.liara.run/public/boy";
+      else if (registeration.gender === "female")
+        profilePic = "https://avatar.iran.liara.run/public/girl";
+      else profilePic = "https://avatar.iran.liara.run/public/other";
+
+      const payload = { ...registeration, profilePic };
+
+      const res = await axios.post("http://localhost:8000/api/user/signup", payload);
+      const data = res.data;
+
+      localStorage.setItem("chat-user", JSON.stringify(data));
+      setAuthUser(data);
+      navigate("/");
     } catch (error) {
-        console.log(error)
+      console.log(error);
     }
-  }
+  };
+
   return (
-    <Box sx={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)' }}>
-      <Paper elevation={8} sx={{ p: 5, borderRadius: 4, minWidth: 350, maxWidth: 400, width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.37)' }}>
-        <Avatar sx={{ m: 1, bgcolor: 'primary.main', width: 56, height: 56 }}>
+    <Box
+      sx={{
+        minHeight: "100vh",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        background: "linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)"
+      }}
+    >
+      <Paper
+        elevation={8}
+        sx={{
+          p: 5,
+          borderRadius: 4,
+          minWidth: 350,
+          maxWidth: 400,
+          width: "100%",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          boxShadow: "0 8px 32px 0 rgba(31, 38, 135, 0.37)"
+        }}
+      >
+        <Avatar sx={{ m: 1, bgcolor: "primary.main", width: 56, height: 56 }}>
           <LockOutlinedIcon fontSize="large" />
         </Avatar>
-        <Typography variant="h4" sx={{ fontFamily: '"Caveat", cursive', fontWeight: 700, mb: 2, color: 'primary.main', letterSpacing: 2 }}>
+        <Typography
+          variant="h4"
+          sx={{
+            fontFamily: '"Caveat", cursive',
+            fontWeight: 700,
+            mb: 2,
+            color: "primary.main",
+            letterSpacing: 2
+          }}
+        >
           Sign Up
         </Typography>
-        <Box component="form" onSubmit={handleSignup} sx={{ width: '100%', mt: 1, display: 'flex', flexDirection: 'column', gap: 2 }}>
+        <Box
+          component="form"
+          onSubmit={handleSignup}
+          sx={{ width: "100%", mt: 1, display: "flex", flexDirection: "column", gap: 2 }}
+        >
           <TextField
             label="Name"
             name="name"
@@ -47,7 +112,7 @@ const SignUp = () => {
             fullWidth
             required
             variant="outlined"
-            InputProps={{ style: { fontFamily: 'inherit' } }}
+            InputProps={{ style: { fontFamily: "inherit" } }}
           />
           <TextField
             label="Email"
@@ -58,7 +123,7 @@ const SignUp = () => {
             fullWidth
             required
             variant="outlined"
-            InputProps={{ style: { fontFamily: 'inherit' } }}
+            InputProps={{ style: { fontFamily: "inherit" } }}
           />
           <TextField
             label="Password"
@@ -69,14 +134,22 @@ const SignUp = () => {
             fullWidth
             required
             variant="outlined"
-            InputProps={{ style: { fontFamily: 'inherit' } }}
+            InputProps={{ style: { fontFamily: "inherit" } }}
           />
           <FormControl component="fieldset" required sx={{ mt: 1 }}>
-            <FormLabel component="legend" sx={{ fontFamily: 'inherit', color: 'primary.main', mb: 1 }}>Gender</FormLabel>
-            <RadioGroup row name="gender" value={registeration.gender} onChange={handleGenderChange} sx={{ justifyContent: 'center' }}>
-              <FormControlLabel value="male" control={<Radio color="primary" />} label="Male" sx={{ fontFamily: 'inherit' }} />
-              <FormControlLabel value="female" control={<Radio color="primary" />} label="Female" sx={{ fontFamily: 'inherit' }} />
-              <FormControlLabel value="other" control={<Radio color="primary" />} label="Other" sx={{ fontFamily: 'inherit' }} />
+            <FormLabel component="legend" sx={{ fontFamily: "inherit", color: "primary.main", mb: 1 }}>
+              Gender
+            </FormLabel>
+            <RadioGroup
+              row
+              name="gender"
+              value={registeration.gender}
+              onChange={handleGenderChange}
+              sx={{ justifyContent: "center" }}
+            >
+              <FormControlLabel value="male" control={<Radio color="primary" />} label="Male" />
+              <FormControlLabel value="female" control={<Radio color="primary" />} label="Female" />
+              <FormControlLabel value="other" control={<Radio color="primary" />} label="Other" />
             </RadioGroup>
           </FormControl>
           <Button
@@ -84,7 +157,7 @@ const SignUp = () => {
             variant="contained"
             color="primary"
             size="large"
-            sx={{ mt: 2, borderRadius: 2, fontWeight: 600, fontFamily: 'inherit', boxShadow: 3 }}
+            sx={{ mt: 2, borderRadius: 2, fontWeight: 600, fontFamily: "inherit", boxShadow: 3 }}
             fullWidth
           >
             Register
@@ -92,7 +165,7 @@ const SignUp = () => {
         </Box>
       </Paper>
     </Box>
-  )
-}
+  );
+};
 
-export default SignUp
+export default SignUp;

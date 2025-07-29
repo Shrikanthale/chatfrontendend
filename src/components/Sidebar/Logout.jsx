@@ -1,13 +1,10 @@
 import React, { useState } from 'react';
 import { LogoutRounded, Person, Settings, Help } from '@mui/icons-material';
+import useLogout from '../../Hooks/useLogout';
 
 const Logout = ({ isDarkMode = false }) => {
   const [isHovered, setIsHovered] = useState(false);
-
-  const handleLogout = () => {
-    // Add logout logic here
-    console.log('Logging out...');
-  };
+  const {loding , logout} = useLogout()
 
   return (
     <div className={`p-3 lg:p-4 border-t ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}`}>
@@ -32,7 +29,7 @@ const Logout = ({ isDarkMode = false }) => {
 
         {/* Logout Button */}
         <button
-          onClick={handleLogout}
+          onClick={logout}
           onMouseEnter={() => setIsHovered(true)}
           onMouseLeave={() => setIsHovered(false)}
           className={`p-1.5 lg:p-2 rounded-full transition-all duration-200 group ${

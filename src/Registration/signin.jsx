@@ -4,10 +4,12 @@ import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import Cookies from 'js-cookie'; // You may need to install js-cookie
+import { useAuthContext } from '../context/AuthContext';
 
 const SignIn = () => {
     const navigate = useNavigate()
-  const [login, setLogin] = useState({ email: '', password: '' });
+    const { setAuthUser } = useAuthContext();
+    const [login, setLogin] = useState({ email: '', password: '' });
 
   const handleChange = (e) => {
     setLogin({ ...login, [e.target.name]: e.target.value });
@@ -17,14 +19,23 @@ const SignIn = () => {
     e.preventDefault();
     try {
       const response = await axios.post('http://localhost:8000/api/user/signin', login);
+  
       if (response.status === 200 && response.data.token) {
+        // Optional: Set cookie if needed
         document.cookie = `Bearer=${response.data.token}; path=/;`;
-        navigate("/posts");
+  
+        // ✅ Save only user data
+        const userData = response.data;
+        localStorage.setItem("chat-user", JSON.stringify(userData));
+        setAuthUser(userData); // ✅ Now this is correct
+  
+        navigate("/");
       }
     } catch (error) {
-      console.log(error);
+      console.log("Sign-in failed:", error);
     }
   };
+  
 
   return (
     <Box sx={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)' }}>
