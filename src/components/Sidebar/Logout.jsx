@@ -4,7 +4,7 @@ import useLogout from '../../Hooks/useLogout';
 
 const Logout = ({ isDarkMode = false }) => {
   const [isHovered, setIsHovered] = useState(false);
-  const {loding , logout} = useLogout()
+  const { logout} = useLogout()
 
   return (
     <div className={`p-3 lg:p-4 border-t ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}`}>
