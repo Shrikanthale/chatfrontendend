@@ -1,11 +1,20 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Messages from './Messages';
 import MessageInput from './MessageInput';
 import { MoreVert, Phone, VideoCall, Search } from '@mui/icons-material';
+import useConversion from '../../Zustand/useConversion';
 
-const MessageContainer = ({ selectedConversation, isDarkMode = false }) => {
+const MessageContainer = ({ isDarkMode = false }) => {
+  const { selectedConversion } = useConversion(); // ✅ read from Zustand
   const [messages, setMessages] = useState([]);
   const [isTyping, setIsTyping] = useState(false);
+
+  // Reset messages when switching conversation
+  useEffect(() => {
+    if (selectedConversion) {
+      setMessages([]); // You can also fetch messages for selectedConversion here
+    }
+  }, [selectedConversion]);
 
   const handleSendMessage = (messageText) => {
     const newMessage = {
@@ -16,9 +25,9 @@ const MessageContainer = ({ selectedConversation, isDarkMode = false }) => {
       isOwn: true,
       status: 'sent'
     };
-    
+
     setMessages(prev => [...prev, newMessage]);
-    
+
     // Simulate typing indicator
     setIsTyping(true);
     setTimeout(() => {
@@ -26,8 +35,8 @@ const MessageContainer = ({ selectedConversation, isDarkMode = false }) => {
       // Simulate reply
       const reply = {
         id: Date.now() + 1,
-        text: "Thanks for your message! I'll get back to you soon. 😊",
-        sender: 'Alice',
+        text: `Reply from ${selectedConversion?.name || 'User'}`,
+        sender: selectedConversion?.name || 'User',
         timestamp: new Date(),
         isOwn: false
       };
@@ -35,11 +44,11 @@ const MessageContainer = ({ selectedConversation, isDarkMode = false }) => {
     }, 2000);
   };
 
-  const conversation = selectedConversation || {
-    name: 'Alice Johnson',
-    avatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face',
-    status: 'online',
-    lastSeen: '2 minutes ago'
+  const conversation = selectedConversion || {
+    name: 'Select a conversation',
+    avatar: 'https://via.placeholder.com/150',
+    status: 'offline',
+    lastSeen: '—'
   };
 
   return (
@@ -64,28 +73,18 @@ const MessageContainer = ({ selectedConversation, isDarkMode = false }) => {
             </p>
           </div>
         </div>
-        
+
         <div className="flex items-center space-x-1 lg:space-x-2">
-          <button className={`p-1.5 lg:p-2 rounded-full transition-colors duration-200 ${
-            isDarkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-100'
-          }`}>
-            <Search className={`w-4 h-4 lg:w-5 lg:h-5 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`} />
-          </button>
-          <button className={`p-1.5 lg:p-2 rounded-full transition-colors duration-200 ${
-            isDarkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-100'
-          }`}>
-            <Phone className={`w-4 h-4 lg:w-5 lg:h-5 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`} />
-          </button>
-          <button className={`p-1.5 lg:p-2 rounded-full transition-colors duration-200 ${
-            isDarkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-100'
-          }`}>
-            <VideoCall className={`w-4 h-4 lg:w-5 lg:h-5 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`} />
-          </button>
-          <button className={`p-1.5 lg:p-2 rounded-full transition-colors duration-200 ${
-            isDarkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-100'
-          }`}>
-            <MoreVert className={`w-4 h-4 lg:w-5 lg:h-5 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`} />
-          </button>
+          {[Search, Phone, VideoCall, MoreVert].map((Icon, idx) => (
+            <button
+              key={idx}
+              className={`p-1.5 lg:p-2 rounded-full transition-colors duration-200 ${
+                isDarkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-100'
+              }`}
+            >
+              <Icon className={`w-4 h-4 lg:w-5 lg:h-5 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`} />
+            </button>
+          ))}
         </div>
       </div>
 
@@ -95,9 +94,11 @@ const MessageContainer = ({ selectedConversation, isDarkMode = false }) => {
       </div>
 
       {/* Message Input */}
-      <div className="flex-shrink-0">
-        <MessageInput onSendMessage={handleSendMessage} isDarkMode={isDarkMode} />
-      </div>
+      {selectedConversion && (
+        <div className="flex-shrink-0">
+          <MessageInput onSendMessage={handleSendMessage} isDarkMode={isDarkMode} />
+        </div>
+      )}
     </div>
   );
 };
